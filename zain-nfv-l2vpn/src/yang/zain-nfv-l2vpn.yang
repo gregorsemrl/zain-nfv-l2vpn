@@ -1,0 +1,160 @@
+module zain-nfv-l2vpn {
+
+  namespace "http://zain.com/services/zain-nfv-l2vpn-showcase";
+  prefix zain-nfv-l2vpn;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "This is a demo package.";
+
+organization "ZAIN";
+  contact "
+     Gregor Semrl <gsemrl@nil.com>
+     Gregor Semrl <gregor.semrl@gmail.com>";
+
+  revision 2023-03-08 {
+    description
+      "Initial revision.";
+  }
+
+  augment /ncs:services {
+    list zain-nfv-l2vpn {
+      tailf:info "This is a demo l2vpn package for l2vpn config";
+      description "This is a demo l2vpn package for l2vpn config";
+
+      key name;
+      leaf name {
+        tailf:info "Service Instance Name";
+        tailf:cli-allow-range;
+        type string;
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint zain-nfv-l2vpn-servicepoint;
+
+      leaf device {
+        tailf:info "NCS device to configure";
+        type leafref {
+          path "/ncs:devices/ncs:device/ncs:name";
+        }
+        mandatory true;
+      }
+
+      leaf bundle-interface-id {
+        tailf:info "Bundle-Ether Interface ID";
+        type uint16;
+        mandatory true;
+      }
+
+      leaf vlan-id {
+        tailf:info "Vlan-ID / Subinterface ID";
+        type uint16;
+        mandatory true;
+      }
+
+      leaf vrf
+      {
+        tailf:info "VRF Name";
+        type string;
+        mandatory true;
+      }
+
+      leaf ip-address {
+        tailf:info "BVI IPv4 Address";
+        type inet:ipv4-address;
+        mandatory true;
+      }
+
+      leaf netmask {
+        tailf:info "BVI IPv4 Netmask";
+        type inet:ipv4-address;
+        default "255.255.255.240";
+      }
+
+      container options
+      {
+        presence true;
+        tailf:info "Configure additional options for L2VPN";
+
+        container BVI
+        {
+          presence true;
+          tailf:info "BVI-specific Options";
+
+          leaf load-interval {
+            tailf:info "Specify interval for load calculation for an interface";
+            tailf:cli-full-command;
+            type uint16 {
+              tailf:info "<0-600>;;Number of seconds";
+              range "0..600" {
+                tailf:step 30;
+              }
+            }
+          }
+
+          leaf mac-address {
+            tailf:info "Set the BVI Mac address(xxxx.xxxx.xxxx) on an interface";
+            type string {
+              tailf:info "WORD;;Mac address in hexadecimal xxxx.xxxx.xxxx";
+              pattern '[0-9a-fA-F]+\.[0-9a-fA-F]+\.[0-9a-fA-F]+';
+            }
+          }
+
+          leaf description 
+          {
+            tailf:info "BVI Description";
+            type string;
+          }
+        }
+
+        container Bundle-Ether
+        {
+          presence true;
+          tailf:info "Bundle-Ether Specific Options";
+
+          leaf description 
+          {
+            tailf:info "Bundle-Ether Description";
+            type string;
+          }
+        }
+
+        container evpn
+        {
+          presence true;
+          tailf:info "evpn Specific Options";
+
+          leaf evi-description 
+          {
+            tailf:info "Bundle-Ether Description";
+            type string;
+          }
+        }
+
+        container l2vpn
+        {
+          presence true;
+          tailf:info "L2 VPN specific options";
+
+          leaf bridge-domain-description 
+          {
+            tailf:info "Bridge Domain Description";
+            type string;
+          }
+        }
+      }
+    }
+  }
+}

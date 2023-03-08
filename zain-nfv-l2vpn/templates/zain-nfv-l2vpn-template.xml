@@ -1,0 +1,90 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{/device}</name>
+      <config>
+
+        <!-- CISCO IOS-XR -->
+        <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <Bundle-Ether-subinterface>
+            <Bundle-Ether>
+              <id>{bundle-interface-id}.{vlan-id}</id>
+              <mode>l2transport</mode>
+              <?if {options/Bundle-Ether/description}?>
+                <description>By NSO: {options/Bundle-Ether/description}</description>
+              <?else?>
+                <description>By NSO: CONNECTED TO HQB-MGMTSW-TELCO_VLAN_{vlan-id}</description>
+              <?end?>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{vlan-id}</vlan-id>
+                </dot1q>
+              </encapsulation>
+            </Bundle-Ether>
+          </Bundle-Ether-subinterface>
+          <BVI>
+            <id>{vlan-id}</id>
+            <host-routing/>
+            <?if {options/BVI/description}?>
+              <description>By NSO: {options/BVI/description}</description>
+            <?else?>
+              <description>By NSO: OpenShift_Test_Cluster-TELCO-CLOUD</description>
+            <?end?>
+            <vrf>{vrf}</vrf>
+            <ipv4>
+              <address>
+                <ip>{ip-address}</ip>
+                <mask>{netmask}</mask>
+              </address>
+            </ipv4>
+            <?if {options/BVI/load-interval}?>
+              <load-interval>{options/BVI/load-interval}</load-interval>
+            <?else?>
+              <load-interval>30</load-interval>
+            <?end?>
+            <mac-address when="{options/BVI/mac-address}">{options/BVI/mac-address}</mac-address>
+          </BVI>
+        </interface>
+        <evpn xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <evi>
+            <id>{vlan-id}</id>
+            <?if {options/evpn/evi-description}?>
+              <description>By NSO: {options/evpn/evi-description}</description>
+            <?else?>
+              <description>By NSO: CONNECTED TO OpenShift_Test_Cluster-TELCO-CLOUD</description>
+            <?end?>
+            <control-word-disable/>
+            <advertise-mac/>
+          </evi>
+        </evpn>
+        <l2vpn xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <bridge>
+            <group>
+              <group-name>vlan{vlan-id}</group-name>
+              <bridge-domain>
+                <bridge-domain-name>vlan{vlan-id}</bridge-domain-name>
+                <?if {options/l2vpn/bridge-domain-description}?>
+                  <description>By NSO: {options/l2vpn/bridge-domain-description}</description>
+                <?else?>
+                  <description>By NSO: CONNECTED TO OpenShift_Test_Cluster-TELCO-CLOUD</description>
+                <?end?>
+                <interface>
+                  <name>Bundle-Ether{bundle-interface-id}.{vlan-id}</name>
+                </interface>
+                <routed>
+                  <interface>
+                    <name>BVI{vlan-id}</name>
+                  </interface>
+                </routed>
+                <evi>
+                  <id>{vlan-id}</id>
+                </evi>
+              </bridge-domain>
+            </group>
+          </bridge>
+        </l2vpn>
+
+      </config>
+    </device>
+  </devices>
+</config-template>
